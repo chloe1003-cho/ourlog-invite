@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>우리의기록 초대</title>
+<meta name="description" content="함께 다녀온 여행의 사진과 리뷰를 한곳에 모아요.">
+<meta property="og:title" content="우리의기록에 초대받았어요">
+<meta property="og:description" content="함께 다녀온 여행의 사진과 리뷰를 한곳에 모아요.">
+<meta name="theme-color" content="#0A0A0A">
+<!--
+  초대 웹페이지. 어디에 올려도 된다(GitHub Pages, Vercel, 자체 도메인 등). 주소 예: https://도메인/invite/?t=<토큰>
+  - 앱이 있으면 '앱에서 열기' → ourlog://invite/<토큰>
+  - 앱이 없으면 설치 안내(INSTALL_URL). TestFlight 공개 링크나 App Store 주소를 넣는다.
+  - 미리보기는 invite_preview RPC 로 가져온다(가입 전에도 볼 수 있게 anon 허용, 토큰을 아는 사람만).
+  아래 CONFIG 의 anon 키는 앱에도 들어 있는 공개 키다. service_role 키는 절대 넣지 않는다.
+-->
+<style>
+  :root {
+    --ink: #0A0A0A; --ink2: #6B6B70; --ink3: #A3A3A8;
+    --bg: #FFFFFF; --muted: #F4F4F5; --line: #E5E5E7;
+    --brand: #0A0A0A; --on-brand: #FFFFFF;
+    --grad: linear-gradient(135deg, #FBE39A 0%, #F2709F 50%, #8B5CF6 100%);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink: #F5F5F7; --ink2: #A1A1A8; --ink3: #6C6C72;
+      --bg: #0A0A0A; --muted: #1C1C1E; --line: #2C2C2E;
+      --brand: #FAFAFA; --on-brand: #0A0A0A;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", sans-serif;
+    -webkit-font-smoothing: antialiased; min-height: 100dvh;
+    display: flex; justify-content: center;
+  }
+  main { width: 100%; max-width: 440px; padding: 40px 24px calc(24px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 24px; }
+  .logo { font-weight: 800; font-size: 15px; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  h1 { font-size: 26px; line-height: 1.3; font-weight: 800; letter-spacing: -0.02em; }
+  .card {
+    position: relative; overflow: hidden; border-radius: 24px; padding: 24px; color: #fff;
+    background: var(--grad); box-shadow: 0 16px 32px rgba(242, 112, 159, 0.25); min-height: 210px;
+    display: flex; flex-direction: column; justify-content: flex-end; gap: 6px;
+  }
+  .card svg { position: absolute; top: 20px; left: 22px; width: 40%; opacity: 0.9; }
+  .card .title { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; }
+  .card .meta { font-size: 14px; opacity: 0.92; }
+  .note { background: var(--muted); border-radius: 16px; padding: 16px; font-size: 15px; line-height: 1.55; }
+  .actions { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
+  .btn {
+    display: flex; align-items: center; justify-content: center; min-height: 56px; border-radius: 14px;
+    font-size: 17px; font-weight: 700; text-decoration: none; border: 0; cursor: pointer;
+  }
+  .btn.primary { background: var(--brand); color: var(--on-brand); }
+  .btn.secondary { background: var(--muted); color: var(--ink); }
+  .small { font-size: 12px; color: var(--ink3); text-align: center; line-height: 1.5; }
+  .skeleton { background: var(--muted); border-radius: 24px; min-height: 210px; animation: pulse 1.2s ease-in-out infinite alternate; }
+  @keyframes pulse { from { opacity: 1 } to { opacity: .55 } }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <div class="logo">우리의기록</div>
+
+  <section id="loading" aria-busy="true">
+    <div class="skeleton"></div>
+  </section>
+
+  <section id="ready" hidden style="display:flex;flex-direction:column;gap:24px">
+    <h1 id="headline"></h1>
+    <div class="card">
+      <svg viewBox="0 0 120 60" fill="none" aria-hidden="true">
+        <path d="M6 50 C 30 50, 26 14, 50 14 S 70 40, 86 40 S 104 10, 114 8" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+        <circle cx="6" cy="50" r="5" fill="#fff"/><circle cx="50" cy="14" r="4" fill="#fff"/>
+        <circle cx="86" cy="40" r="4" fill="#fff"/><circle cx="114" cy="8" r="5" fill="#fff"/>
+      </svg>
+      <div class="title" id="trip-title"></div>
+      <div class="meta" id="trip-meta"></div>
+    </div>
+    <p class="note" id="note">앱에서 참여하면 같은 날 내가 찍은 사진을 찾아서 이 여행에 함께 넣어드려요. 서로 쓴 장소 리뷰도 한곳에서 볼 수 있어요.</p>
+  </section>
+
+  <section id="invalid" hidden style="display:flex;flex-direction:column;gap:12px">
+    <h1>초대를 열 수 없어요</h1>
+    <p class="note">링크가 만료됐거나 올바르지 않아요. 초대한 사람에게 다시 보내달라고 해주세요.</p>
+  </section>
+
+  <div class="actions" id="actions" hidden>
+    <a class="btn primary" id="open-app" href="#">앱에서 열기</a>
+    <a class="btn secondary" id="install" href="#">앱 설치하기</a>
+    <p class="small" id="route-note"></p>
+  </div>
+</main>
+
+<script>
+  // 배포할 때 채운다. anon 키는 공개 키라 넣어도 된다.
+  const CONFIG = {
+    supabaseUrl: "https://qblmztqxlqfyppkrbhvd.supabase.co",
+    supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFibG16dHF4bHFmeXBwa3JiaHZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMTM1OTcsImV4cCI6MjEwNzg4OTU5N30.8kzkXVB_HQhAA_oEPhRay1ei-THVkoK3nIEH7HXM1P4",
+    // TestFlight 공개 링크(https://testflight.apple.com/join/...) 또는 App Store 주소
+    installUrl: "",
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const token = new URLSearchParams(location.search).get("t") || "";
+  const validToken = /^[A-Za-z0-9_-]{8,64}$/.test(token);
+
+  function show(id) {
+    for (const s of ["loading", "ready", "invalid"]) $(s).hidden = s !== id;
+  }
+
+  function dateRange(startIso, endIso) {
+    const s = new Date(startIso), e = new Date(endIso);
+    const md = (d) => `${d.getMonth() + 1}월 ${d.getDate()}일`;
+    if (s.toDateString() === e.toDateString()) return md(s);
+    return s.getMonth() === e.getMonth() ? `${md(s)} – ${e.getDate()}일` : `${md(s)} – ${md(e)}`;
+  }
+
+  function setupActions() {
+    const appUrl = `ourlog://invite/${encodeURIComponent(token)}`;
+    $("open-app").href = appUrl;
+    const install = $("install");
+    if (CONFIG.installUrl.startsWith("http")) {
+      install.href = CONFIG.installUrl;
+    } else {
+      install.removeAttribute("href");
+      install.textContent = "앱 준비 중이에요";
+    }
+    $("actions").hidden = false;
+    // 앱이 없을 때 자동으로 열면 사파리가 '주소가 유효하지 않음' 경고를 띄워서, 버튼으로만 연다.
+  }
+
+  async function load() {
+    if (!validToken) { show("invalid"); return; }
+    try {
+      const res = await fetch(`${CONFIG.supabaseUrl}/rest/v1/rpc/invite_preview`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: CONFIG.supabaseAnonKey,
+          Authorization: `Bearer ${CONFIG.supabaseAnonKey}`,
+        },
+        body: JSON.stringify({ invite_token: token }),
+      });
+      const rows = res.ok ? await res.json() : [];
+      const p = rows[0];
+      if (!p) { show("invalid"); return; }
+
+      // 서버에서 온 글자는 textContent 로만 넣는다.
+      $("headline").textContent = `${p.inviter_name}님이 초대했어요`;
+      $("trip-title").textContent = p.trip_title;
+      $("trip-meta").textContent = `${dateRange(p.started_at, p.ended_at)} · ${p.stay_count}곳 · 사진 ${p.photo_count}장`;
+      $("route-note").textContent = p.share_route
+        ? "초대한 사람이 이동 루트를 공개했어요"
+        : "초대한 사람의 이동 루트는 본인이 공개한 경우에만 보여요";
+      document.title = `${p.inviter_name}님의 ${p.trip_title} 초대`;
+      show("ready");
+      setupActions();
+    } catch {
+      show("invalid");
+    }
+  }
+
+  load();
+</script>
+</body>
+</html>
