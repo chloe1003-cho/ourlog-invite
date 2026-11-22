@@ -3,15 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>우리의기록 초대</title>
+<title>하이마이데이 초대</title>
 <meta name="description" content="함께 다녀온 여행의 사진과 리뷰를 한곳에 모아요.">
-<meta property="og:title" content="우리의기록에 초대받았어요">
+<meta property="og:title" content="하이마이데이에 초대받았어요">
 <meta property="og:description" content="함께 다녀온 여행의 사진과 리뷰를 한곳에 모아요.">
 <meta name="theme-color" content="#0A0A0A">
 <!--
   초대 웹페이지. 어디에 올려도 된다(GitHub Pages, Vercel, 자체 도메인 등). 주소 예: https://도메인/invite/?t=<토큰>
-  - 앱이 있으면 '앱에서 열기' → ourlog://invite/<토큰>
-  - 앱이 없으면 설치 안내(INSTALL_URL). TestFlight 공개 링크나 App Store 주소를 넣는다.
+  이 페이지는 '앱이 바로 열리지 않았을 때'만 보인다. 순서:
+  1. 유니버설 링크: 앱이 깔린 아이폰에서 링크를 누르면 iOS 가 이 페이지 대신 앱을 연다
+     (도메인 루트의 /.well-known/apple-app-site-association + 앱의 applinks 권한).
+  2. 카카오톡 같은 앱 안 브라우저는 유니버설 링크를 안 타서 이 페이지가 열린다 → 앱 주소(<스킴>://invite/<토큰>)를 바로 열어 본다.
+     앱이 안 열리면(= 앱이 없으면) 이 페이지(미리보기 + '앱 설치하기')에 머문다.
+  3. 사파리에서 이 페이지가 열렸다면 앱이 없다는 뜻이라 앱 주소를 열지 않는다
+     (사파리는 없는 앱 주소를 열면 '주소가 유효하지 않음' 경고를 띄운다).
+  4. 스토어로 자동으로 보내지 않는다. '앱 설치하기'를 누를 때 이 초대 링크를 클립보드에 복사하고 스토어로 간다
+     (아이폰 = INSTALL_URL = App Store, 안드로이드 = ANDROID_INSTALL_URL = Google Play).
+     iOS 는 누르는 동작 없이는 복사를 막기 때문. 앱은 설치 후 첫 실행에서 붙여넣기를 권해 초대 화면으로 이어 준다(InvitePasteOffer).
+  5. 아이폰이 아니면 앱 주소를 열지 않는다. 안드로이드는 Google Play 주소가 있으면 설치하기 버튼만, 없으면 안내만.
   - 미리보기는 invite_preview RPC 로 가져온다(가입 전에도 볼 수 있게 anon 허용, 토큰을 아는 사람만).
   아래 CONFIG 의 anon 키는 앱에도 들어 있는 공개 키다. service_role 키는 절대 넣지 않는다.
 -->
@@ -63,7 +72,7 @@
 </head>
 <body>
 <main>
-  <div class="logo">우리의기록</div>
+  <div class="logo">하이마이데이</div>
 
   <section id="loading" aria-busy="true">
     <div class="skeleton"></div>
@@ -91,6 +100,8 @@
   <div class="actions" id="actions" hidden>
     <a class="btn primary" id="open-app" href="#">앱에서 열기</a>
     <a class="btn secondary" id="install" href="#">앱 설치하기</a>
+    <p class="small" id="install-note" hidden>설치하기를 누르면 이 초대 링크가 복사돼요. 앱을 처음 열 때 붙여넣으면 이 여행으로 바로 이어져요.</p>
+    <p class="small" id="platform-note" hidden></p>
     <p class="small" id="route-note"></p>
   </div>
 </main>
@@ -98,10 +109,14 @@
 <script>
   // 배포할 때 채운다. anon 키는 공개 키라 넣어도 된다.
   const CONFIG = {
-    supabaseUrl: "https://qblmztqxlqfyppkrbhvd.supabase.co",
-    supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFibG16dHF4bHFmeXBwa3JiaHZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMTM1OTcsImV4cCI6MjEwNzg4OTU5N30.8kzkXVB_HQhAA_oEPhRay1ei-THVkoK3nIEH7HXM1P4",
-    // TestFlight 공개 링크(https://testflight.apple.com/join/...) 또는 App Store 주소
-    installUrl: "",
+    supabaseUrl: "https://rnyirhktueytewnnntkt.supabase.co",
+    supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJueWlyaGt0dWV5dGV3bm5udGt0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4NzU1MzEsImV4cCI6MjEwODQ1MTUzMX0.C3LnBFKg9nCySG_Vmp0uqN4RvfYBvca9WpB7tcGqzg4",
+    // App Store 주소(또는 TestFlight 공개 링크 https://testflight.apple.com/join/...)
+    installUrl: "https://apps.apple.com/kr/app/id6827628261",
+    // Google Play 주소. 비어 있으면 안드로이드에는 '아이폰 앱만 있어요' 안내만 한다
+    androidInstallUrl: "",
+    // 앱 주소 스킴: prd = himyday, dev = ourlog
+    appScheme: "himyday",
   };
 
   const $ = (id) => document.getElementById(id);
@@ -119,22 +134,118 @@
     return s.getMonth() === e.getMonth() ? `${md(s)} – ${e.getDate()}일` : `${md(s)} – ${md(e)}`;
   }
 
-  function setupActions() {
-    const appUrl = `ourlog://invite/${encodeURIComponent(token)}`;
-    $("open-app").href = appUrl;
-    const install = $("install");
-    if (CONFIG.installUrl.startsWith("http")) {
-      install.href = CONFIG.installUrl;
+  const appUrl = `${CONFIG.appScheme}://invite/${encodeURIComponent(token)}`;
+  const isHttp = (u) => /^https:\/\//.test(u);
+
+  // 어디서 열렸나. 아이패드는 맥처럼 보여서 터치 여부로 가린다.
+  function detect(ua, platform, touchPoints) {
+    const ios = /iPhone|iPad|iPod/.test(ua) || (platform === "MacIntel" && touchPoints > 1);
+    // 앱 안 브라우저(카카오톡·인스타·페이스북·네이버·라인·스레드 등). 유니버설 링크를 타지 않고, 없는 앱 주소를 열어도 경고가 없다.
+    const inApp = /KAKAOTALK|Instagram|FBAN|FBAV|FB_IAB|NAVER\(inapp|Line\/|DaumApps|Barcelona|everytimeApp/i.test(ua);
+    const android = /Android/i.test(ua);
+    return { ios, android, inApp };
+  }
+
+  // 자동으로 어디로 보낼지. "app" = 앱 주소를 열어 본다(안 열리면 이 페이지에 머문다), "stay" = 버튼만.
+  // 스토어로는 자동으로 보내지 않는다: 누르는 동작이 있어야 초대 링크를 복사할 수 있다.
+  function plan(env, alreadyRouted) {
+    if (!validToken || alreadyRouted || !env.ios) return "stay";
+    return env.inApp ? "app" : "stay";
+  }
+
+  // 퍼널 기록(log_invite_event). 개인 정보 없이 이벤트·기기 종류만. 실패해도 페이지는 그대로.
+  // keepalive: 스토어·앱으로 넘어가며 페이지가 닫혀도 요청이 끝까지 간다.
+  let envForLog = { ios: false, android: false, inApp: false };
+  function logEvent(event, extra = {}) {
+    if (!validToken) return;
+    try {
+      fetch(`${CONFIG.supabaseUrl}/rest/v1/rpc/log_invite_event`, {
+        method: "POST", keepalive: true,
+        headers: {
+          "Content-Type": "application/json",
+          apikey: CONFIG.supabaseAnonKey,
+          Authorization: `Bearer ${CONFIG.supabaseAnonKey}`,
+        },
+        body: JSON.stringify({
+          event, invite_token: token, source: "web",
+          platform: envForLog.ios ? "ios" : envForLog.android ? "android" : "other",
+          in_app_browser: envForLog.inApp, ...extra,
+        }),
+      }).catch(() => {});
+    } catch { /* 기록 실패는 무시 */ }
+  }
+
+  // 초대 링크(이 페이지 주소)를 클립보드에. 버튼을 누른 그 순간에 불러야 한다.
+  function copyInvite() {
+    const text = location.href;
+    try {
+      // 옛 방식을 먼저: 누른 순간 동기로 끝나 앱 안 브라우저에서도 잘 된다.
+      const area = document.createElement("textarea");
+      area.value = text; area.setAttribute("readonly", "");
+      area.style.position = "fixed"; area.style.opacity = "0";
+      document.body.appendChild(area);
+      area.select(); area.setSelectionRange(0, text.length);
+      const ok = document.execCommand("copy");
+      area.remove();
+      if (ok) return;
+    } catch { /* 아래로 */ }
+    try { navigator.clipboard?.writeText(text); } catch { /* 복사 못 해도 설치는 간다 */ }
+  }
+
+  // 같은 탭에서 한 번만 자동으로 넘긴다. 스토어에서 돌아온 사람을 또 보내지 않게.
+  const routedKey = `invite-routed:${token}`;
+  function alreadyRouted() { try { return sessionStorage.getItem(routedKey) === "1"; } catch { return false; } }
+  function markRouted() { try { sessionStorage.setItem(routedKey, "1"); } catch { /* 사생활 보호 모드 등: 그냥 넘어간다 */ } }
+
+  // 이 기기에 맞는 스토어 주소. 아이폰 = App Store, 안드로이드 = Google Play, 그 밖(PC 등) = 없음
+  function storeUrl(env) {
+    if (env.ios) return isHttp(CONFIG.installUrl) ? CONFIG.installUrl : "";
+    if (env.android) return isHttp(CONFIG.androidInstallUrl) ? CONFIG.androidInstallUrl : "";
+    return "";
+  }
+
+  function setupActions(env) {
+    const openApp = $("open-app"), install = $("install"), note = $("platform-note");
+    openApp.href = appUrl;
+    openApp.addEventListener("click", () => logEvent("open_app_try"));
+    // 앱 주소(himyday://)는 아이폰 앱만 받는다
+    openApp.hidden = !env.ios;
+    const url = storeUrl(env);
+    if (url) {
+      install.href = url;
+      const store = env.ios ? "app_store" : "google_play";
+      install.addEventListener("click", () => {
+        if (validToken) copyInvite();
+        logEvent("install_click", { store });
+      });
+      // 설치 후 붙여넣기로 이어받기는 아이폰 앱에만 있다
+      $("install-note").hidden = !(env.ios && validToken);
     } else {
-      install.removeAttribute("href");
-      install.textContent = "앱 준비 중이에요";
+      install.hidden = true;
     }
+    if (env.android && !url) note.textContent = "지금은 아이폰 앱만 있어요. 아이폰에서 이 링크를 열어주세요.";
+    else if (!env.ios && !env.android) note.textContent = "휴대폰에서 이 링크를 열어 앱을 설치해 주세요.";
+    note.hidden = !note.textContent;
     $("actions").hidden = false;
-    // 앱이 없을 때 자동으로 열면 사파리가 '주소가 유효하지 않음' 경고를 띄워서, 버튼으로만 연다.
+  }
+
+  function route(env) {
+    const step = plan(env, alreadyRouted());
+    if (step === "stay") return;
+    markRouted();
+    logEvent("open_app_try");
+    // 앱 주소를 연다. 앱이 열리면 이 페이지는 가려진다. 앱이 없으면 아무 일 없이 이 페이지(미리보기 + 설치하기)가 남는다.
+    location.href = appUrl;
   }
 
   async function load() {
     if (!validToken) { show("invalid"); return; }
+    // 버튼과 자동 이동은 미리보기를 기다리지 않는다(서버가 느리거나 실패해도 앱·스토어로는 간다).
+    const env = detect(navigator.userAgent, navigator.platform, navigator.maxTouchPoints || 0);
+    envForLog = env;
+    logEvent("page_view");
+    setupActions(env);
+    route(env);
     try {
       const res = await fetch(`${CONFIG.supabaseUrl}/rest/v1/rpc/invite_preview`, {
         method: "POST",
@@ -158,7 +269,6 @@
         : "초대한 사람의 이동 루트는 본인이 공개한 경우에만 보여요";
       document.title = `${p.inviter_name}님의 ${p.trip_title} 초대`;
       show("ready");
-      setupActions();
     } catch {
       show("invalid");
     }
